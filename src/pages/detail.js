@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from "react";
+import './detail.css';
+import React, { useContext, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import styled from "styled-components";
 // CSS-in-JS 자바스크립트 안에 css 코드 쓰기
@@ -10,6 +11,8 @@ import styled from "styled-components";
 // CSS-in-JS 라이브러리 중 가장 많이 쓰이는 Styled Components를 사용
 
 // * css파일을 쓰고 싶으면?? detail.module.css로 작명하면 됨. 중간에 module
+import { Card, Nav, } from 'react-bootstrap'
+import { Context1 } from './../App.js'
 
 let YellowBtn = styled.button`
 	background: ${ props => props.bg };
@@ -34,9 +37,13 @@ class Detail2 extends React.Component {
 }
 
 const Detail = (props) => {
+  let { stock, shoes} = useContext(Context1) // 보관함 해체해서 변수에 넣어주기
+  console.log("data", stock)
+  console.log("data", shoes)
 
-  
+  let [index, setIndex] = useState(0);
   let [count, setCount] = useState(0);
+  let [fade2, setFade2] = useState('');
   
 	let { id } = useParams(); // 현재 url의 파라미터 가져오는 hook
 	// ex: /detail/1 이면 1이 파라미터 detail은 pathname이다
@@ -61,11 +68,16 @@ const Detail = (props) => {
     const timer = setTimeout(() => { console.log('타이머 시작'); setAlert(false) }, 2000)
     console.log('12341234');
 
+    // 디테일 페이지 첫 렌더링시 애니메이션 효과주기
+    let time = setTimeout(setFade2('ac'));
+
     // useEffect 훅 사용시 클린업 함수를 반환할 수 있다. side effect로 인해 생성된 리소스를 정리하거나 해제하는 데 사용
     return () => {
       // useEffect 내 생성된 타이머는 컴포넌트가 언마운트되거나 업데이트되기 전에 제거되어야 한다. (memory leak 방지)
       console.log('컴포넌트가 언마운트되거나 업데이트되기 전에 타이머 정리하자');
       clearTimeout(timer);
+      clearTimeout(time);
+      setFade2('');
     }
   }, [])
   // useEffect 훅의 두 번째 인수로 전달된 배열(count)은 의존성 배열(dependency array)라고 한다. (특정 값에 의존하여 실행 조건을 설정한다)
@@ -77,13 +89,13 @@ const Detail = (props) => {
   // 이렇게 하는 게 맞는게.. 계속 123123 찍히면 곤란.. 이게 콘솔이 아니라 반복문 만 번 수행하는 거였으면.. 렌더링 될 때마다 반복문 수행한다는 건데 좀 에바인 것 같습니다.
 
 	return (
-		<div className="container">
+		<div className={`container bc ${fade2}`}>
       {/* <Alert alert={alert}/> */}
       {
         alert ? <Alert /> : null
       }
-      {count}
-      <button onClick={()=>{setCount(++count)}}>button</button>
+      {/* {count}
+      <button onClick={()=>{setCount(++count)}}>button</button> */}
 			<div className="row">
 				<div className="col-md-6">
 				<img src={'https://codingapple1.github.io/shop/shoes'+ (shoe.id+1) +'.jpg'} width="80%" />
@@ -96,8 +108,67 @@ const Detail = (props) => {
 					<button className="btn btn-danger">주문하기</button>
 				</div>
 			</div>
+
+      <Tab index={index} setIndex={setIndex} shoes={props.shoes}/>
 		</div>
 	)
+}
+
+const Tab = ({ index, setIndex, shoes }) => {
+  return(
+    <div>
+      <Card>
+        <Card.Header>
+          <Nav variant="tabs" defaultActiveKey="#first">
+            <Nav.Item onClick={() => {setIndex(0)}}>
+              <Nav.Link href="#first">tab1</Nav.Link>
+            </Nav.Item>
+            <Nav.Item onClick={() => {setIndex(1)}}>
+              <Nav.Link href="#second">tab2</Nav.Link>
+            </Nav.Item>
+            <Nav.Item onClick={() => {setIndex(2)}}>
+              <Nav.Link href="#third">tab3</Nav.Link>
+            </Nav.Item>
+          </Nav>
+        </Card.Header>
+
+        <TabInfo index={index} setIndex={setIndex} shoes={shoes}/>
+      </Card>
+    </div>
+  )
+}
+
+const TabInfo = ({ index, shoes }) => {
+  let [fade, setFade] = useState('');
+  let { stock } = useContext(Context1);
+  
+  useEffect(() => {
+    // setTimeout 이유? React 18의 Automatic Batching 때문
+    // automatic batching? 더 나은 성능을 위해 여러개의 state 업데이트를 한 번의 리렌더링으로 묶어서 진행하는 것
+    let time = setTimeout(() => {setFade('end')}, 100)
+
+    // useEffect() 함수의 return 값으로 콜백 함수를 설정하면 Componenet가 unmount or update 되기 직전에 이 함수가 실행된다.
+    // 즉, useEffect 전에 실행되는 함수라고 보면 됨
+    return () => {
+      clearTimeout(time);
+      setFade('')
+    }
+    
+  }, [index])
+
+  return(  
+    <>
+      {/* 탭 변경이 일어날 때마다 className에 end가 들어가도록 */}
+      <Card.Body className={`start ${fade}`}>
+        <Card.Title>
+          {shoes[0].title} information!
+        </Card.Title>
+        <Card.Text>
+          재고 {stock[0]}개 남았다!
+        </Card.Text>
+      </Card.Body>
+    </>
+  )
 }
 
 const Alert = () => {

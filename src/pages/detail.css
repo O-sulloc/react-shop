@@ -1,0 +1,22 @@
+.start {
+  /* opacity: 0; */
+  
+  transform: scale(0);
+}
+
+.end {
+  /* opacity: 1; */
+  /* transition: opacity 0.5s; */
+
+  transform: scale(1);
+  transition: transform 1s;
+}
+
+.bc {
+  opacity: 0;
+}
+
+.ac {
+  opacity: 1;
+  transition: opacity 1s;
+}
