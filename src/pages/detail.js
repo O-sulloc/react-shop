@@ -13,6 +13,8 @@ import styled from "styled-components";
 // * css파일을 쓰고 싶으면?? detail.module.css로 작명하면 됨. 중간에 module
 import { Card, Nav, } from 'react-bootstrap'
 import { Context1 } from './../App.js'
+import { addCart } from '../store.js';
+import { useDispatch, useSelector } from 'react-redux';
 
 let YellowBtn = styled.button`
 	background: ${ props => props.bg };
@@ -37,9 +39,12 @@ class Detail2 extends React.Component {
 }
 
 const Detail = (props) => {
-  let { stock, shoes} = useContext(Context1) // 보관함 해체해서 변수에 넣어주기
-  console.log("data", stock)
-  console.log("data", shoes)
+  let dispatch = useDispatch()
+  let cart = useSelector((state) => state.cart)
+
+  let { stock, shoes } = useContext(Context1) // 보관함 해체해서 변수에 넣어주기
+  // console.log("data", stock)
+  // console.log("data", shoes)
 
   let [index, setIndex] = useState(0);
   let [count, setCount] = useState(0);
@@ -105,7 +110,19 @@ const Detail = (props) => {
 					<p>{shoe.id}</p>
 					<p>{shoe.content}</p>
 					<p>{shoe.price}</p>
-					<button className="btn btn-danger">주문하기</button>
+					
+          {/* 버튼 누르면 해당 정보가 store.js의 cart 객체에 들어가게 */}
+          <button 
+            className="btn btn-danger"
+            onClick={() => {
+              console.log("cart b4", cart)
+              console.log("shoe", shoe)
+              dispatch(addCart(shoe))
+              console.log("cart after", cart)
+            }}
+          >
+            장바구니
+          </button>
 				</div>
 			</div>
 
