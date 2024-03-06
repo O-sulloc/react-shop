@@ -6,6 +6,7 @@ import { Routes, Route, Link, useNavigate, Outlet, json } from 'react-router-dom
 import Detail from './pages/detail.js'
 import axios from 'axios';
 import Cart from './pages/Cart.js'
+import { useQuery } from 'react-query';
 
 // context API 사용해보기
 // 1. createContext() 생성해서 context에 넣기 (context가 먼디 -> state 보관함)
@@ -13,6 +14,26 @@ export let Context1 = createContext()
 // 2. <context1>로 원하는 컴포넌트 감싸기 -> <detail> 컴포넌트 감쌌지롱
 
 function App() {
+
+  // ajax 요청할 때
+  // axios.get('https://codingapple1.github.io/userdata.json').then((a) => {
+  //   return a.data
+  // })
+  // 이렇게 해도 되는데 아래처럼 react-query로 감싸면 좋은 이유
+  // 1. 성공/실패/로딩중인지 쉽게 알 수 있음 (data.isError, data.isLoading 등)
+  // 2. 틈만나면 자동으로 저 Url로 계속 요청 보냄 -> 최신 데이터 계속 받아올 수 있음 (전문용어로 refetch) (staleTime으로 refetch 간격도 조절할 수 있음. refetch 끌 수도 잇음)
+  // 3. 실패해도 자동으로 retry 함. 다시 요청 보내줌. 
+  // 4. 값을 공유하고 싶을 때 state나 props 안 써줘도 됨. 똑같은 useQuery 복붙해도 됨. 
+  // -> 그럼 똑같은 요청을 두 번이나 보내는데 완전 비효율 아님? ㅇㅇ 아님 리액트는 한 번만 처리한다고 하네요... ㄷㄷ 레전드 고능해
+  // 5. ajax 결과를 캐싱한다. 똑같은 요청이 들어오면, 일단 그 전에 실행했던 걸 불러와서 먼저 보여주고!! 그 다음에 그 요청을 수행한다고 함... (일단 결과를 빨리 볼 수 있어서 좋은듯)
+
+  // 중괄호랑 return 생략도 가능
+  let result = useQuery('call', () => {
+    return axios.get('https://codingapple1.github.io/userdata.json').then((a) => {
+      console.log('요청함')
+      return a.data
+    })
+  })
 
   // localStorage에 최근 본 상품 저장해보기
   useEffect(() => {
@@ -48,6 +69,13 @@ function App() {
             <Nav.Link onClick={()=>{ navigate('/event') }}>Event</Nav.Link>
             <Nav.Link onClick={()=>{ navigate('/detail') }}>Detail</Nav.Link>
             <Nav.Link onClick={()=>{ navigate('/cart') }}>Cart</Nav.Link>
+          </Nav>
+          <Nav className="ms-auto">
+            {/* { result.isLoading ? 'loding...' : result.data.name } */}
+            {/* 삼항 연산자 말고 아래처럼 써도 굳 */}
+            { result.isLoading && 'loding...'}
+            { result.isError && 'error!!!'}
+            { result.data && result.data.name }
           </Nav>
         </Container>
       </Navbar>
