@@ -53,8 +53,21 @@ const Detail = (props) => {
 	let { id } = useParams(); // 현재 url의 파라미터 가져오는 hook
 	// ex: /detail/1 이면 1이 파라미터 detail은 pathname이다
 	// pathname은 useLocation() hook을 사용하여 가져올 수 있다.
+
+  // localStorage에 최근 본 상품 저장해보기
+  useEffect(() => {
+    let data = JSON.parse(localStorage.getItem('watched')); // localStorage에서 watched라는 데이터 꺼냄 -> json 파싱
+
+    const setData = new Set(data); // set 자료형 쓴 이유 -> 중복된 아이디 안 들어가게 하려고
+    console.log(shoe.id)
+    setData.add(shoe.id)
   
-	let shoe = props.shoes.find(shoe => shoe.id == id);
+    localStorage.setItem('watched', JSON.stringify(Array.from(setData))); // 배열로 바꿔 -> JSON 형태로 바꿔서 넣어줘
+  }, [])
+  
+  console.log('shoe',props)
+
+	let shoe = props.shoes.find(shoe => shoe.id == Number(id));
   
   let [alert, setAlert] = useState(true);
   

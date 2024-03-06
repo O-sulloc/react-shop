@@ -1,8 +1,8 @@
 import './App.css';
 import { Container, Nav, Navbar } from 'react-bootstrap';
-import { createContext, useState } from 'react';
+import { createContext, useEffect, useState } from 'react';
 import data from './data.js';
-import { Routes, Route, Link, useNavigate, Outlet } from 'react-router-dom'
+import { Routes, Route, Link, useNavigate, Outlet, json } from 'react-router-dom'
 import Detail from './pages/detail.js'
 import axios from 'axios';
 import Cart from './pages/Cart.js'
@@ -13,12 +13,29 @@ export let Context1 = createContext()
 // 2. <context1>로 원하는 컴포넌트 감싸기 -> <detail> 컴포넌트 감쌌지롱
 
 function App() {
+
+  // localStorage에 최근 본 상품 저장해보기
+  useEffect(() => {
+    let data = localStorage.getItem('watched')
+    if (!data) {
+      localStorage.setItem('watched',JSON.stringify([]))
+    }
+  }, [])
+
+  let obj = { name: 'kim' }
+  JSON.stringify(obj); // 배열,객체를 JSON으로 변환해줌
+  localStorage.setItem('data', JSON.stringify(obj))
+  let d = localStorage.getItem('data')
+  JSON.parse(d) // json을 객체로 변환
+  console.log(JSON.parse(d))
+  console.log(JSON.parse(d).name)
+
   let [stock] = useState([10, 20, 30]);
 
   let [shoes, setShoes] = useState(data);
   let [count, setCount] = useState(2);
   let [show, setShow] = useState(false);
-  let navigate  =useNavigate(); // hook(유용한 정보들이 들어있는 함수)
+  let navigate = useNavigate(); // hook(유용한 정보들이 들어있는 함수)
   // useNavigate()는 페이지 이동을 도와준다.
 
   return (
@@ -164,11 +181,14 @@ const About = () => {
 }
 
 const List = (props) => {
+  console.log(props)
   return (
     <div className='col-md-4'>
-      <img src={'https://codingapple1.github.io/shop/shoes'+ (props.i+1) +'.jpg'} width="80%" />
-      <h4>{props.shoe.title}</h4>
-      <p>{props.shoe.price}</p>
+      <a href={`/detail/${props.shoe.id}`}>
+        <img src={'https://codingapple1.github.io/shop/shoes'+ (props.i+1) +'.jpg'} width="80%" />
+        <h4>{props.shoe.title}</h4>
+        <p>{props.shoe.price}</p>
+      </a>
     </div>
   )
 }
